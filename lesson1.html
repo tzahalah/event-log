@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth'
+        });
+        calendar.render();
+      });
+
+    </script>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        axios.get(`https://localhost:7195/api/Events`).then((res)=>{
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: res.data,
+      });
+  
+      calendar.render(); 
+      var lst=res.data;
+      lst.forEach(element  => {
+      e=document.createElement("option");
+      e.text=element.title+ "  "+element.start;
+      e.value=element.id;
+      events.appendChild(e);
+      
+    });
+  });
+});
+
+   
+  </script>
+
+
+
+
+  <script>
+     //   function getEvents() {
+            //send api request
+      //      axios.get(`https://localhost:7195/api/Events`).then((res) => {
+      //          console.log(res.data)
+      //          alert(res.data)
+      //      })
+      //  }
+
+        function addEvent() {
+          var date= document.getElementById('date').value;
+          var event= document.getElementById("event").value;
+            axios.post(`https://localhost:7195/api/Events`, {
+                "title": event,
+                "start": date
+            }).then(res => {
+                console.log(res.data)
+                location.reload();
+            })
+          
+          }
+
+        function updateEvent() {
+          let i = document.getElementById("events")
+          let id = i[i.selectedIndex].value;
+          var date= document.getElementById("date").value;
+          var event= document.getElementById("event").value;
+            axios.put(`https://localhost:7195/api/Events/${id}`, {
+              "title": event,
+              "start": date
+            }).then(res => {
+                console.log(res.data);
+                location.reload();
+            })
+            
+          }
+
+        function deleteEvent() {
+          let i = document.getElementById('events');
+          let id = i[i.selectedIndex].value;
+            axios.delete(`https://localhost:7195/api/Events/${id}`).then(res => {
+                console.log(res.data)
+                location.reload();
+            })
+           
+        }
+
+        function fill(){
+          id=document.getElementById("events").selectedIndex;
+          d=document.getElementById("date");
+          ev=document.getElementById("event");
+          axios.get("https://localhost:7195/api/Events").then(res => {
+          ev.value= res.data[id].title;
+          d.value= res.data[id].start;
+           })
+        }
+    </script>
+  </head>
+  <body>
+
+    <button onclick="addEvent()">הוסף אירוע</button>
+    <button onclick="updateEvent()">עדכן אירוע</button>
+    <button onclick="deleteEvent()">מחק אירוע</button>
+    <select id="events"  onchange="fill()" >אירועים</select>
+    <input type="date" id="date">
+    <input type="text" id="event">
+    <div id='calendar'></div>
+  </body>
+</html>
